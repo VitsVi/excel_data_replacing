@@ -60,6 +60,8 @@ def component_suppliers_open(
                     for cell in reversed(looking_range):
                         if cell.value is not None:
                             lower_ground = f'$A${cell.row + 1}'
+                            print('------------------------')
+                            print(sheet_name.range('E30').formula)
                             print(lower_ground)
                             break
             if not list_found:
