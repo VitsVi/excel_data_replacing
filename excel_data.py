@@ -29,7 +29,50 @@ FILENAMES = [
 ]
 
 # ООО ТД Л-Пак
+def component_suppliers_open(
+    app: xw.App,
+    data,
+    filename='Поставщики комплектующих.xlsx',
+):
+    component_suppliers_path = glob(f'{WORK_DIR}/{filename}')
+    
+    if not component_suppliers_path:
+        logging.error(f'Не найден файл: {filename}')
+        sys.exit(1)
+        
+    book = app.books.open(component_suppliers_path[0])
+    logging.info(f'Открытие книги: {filename}')
+    filename = os.path.basename(component_suppliers_path[0])
+    
+    try:
+        logging.info('Поиск листа с поставщиками и вставка данных')
+        data_value = data.value
 
+        for row in data.rows:
+            list_found = False
+            lower_ground = None
+            for sheet_name in book.sheets:
+                if sheet_name.name.strip() == row[0].value.strip():
+                    list_found = True
+                    logging.info(f'Лист найден: {row[0].value}')
+                    sheet = book.sheets[sheet_name.name]
+                    looking_range = sheet.range('A1:A200')
+                    for cell in reversed(looking_range):
+                        if cell.value is not None:
+                            lower_ground = f'$A${cell.row + 1}'
+                            print(lower_ground)
+                            break
+            if not list_found:
+                logging.error(f'НЕ найден лист: {row[0].value}')
+
+    except:
+        logging.error(f'Ошибка при работе с файлом: {filename}')
+        sys.exit(1)
+    finally:
+        logging.info(f'Закрытие книги: {filename}')
+        #book.save()
+        book.close()
+    ...
 
 def daily_finance_open(
     app: xw.App,
@@ -43,6 +86,7 @@ def daily_finance_open(
         sys.exit(1)
 
     book = app.books.open(daily_finance_path[0])
+    logging.info(f'Открытие книги: {filename}')
     filename = os.path.basename(daily_finance_path[0])
     try:
         try:
@@ -52,6 +96,7 @@ def daily_finance_open(
             logging.error(f'Не найден лист: {sheet_name}')
 
         input_data = daily_finance_search_data(sheet)
+        component_suppliers_open(app, input_data)
     except:
         logging.error(f'Ошибка при работе с файлом: {filename}')
     finally:
