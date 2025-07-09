@@ -3,6 +3,8 @@ import datetime as dt
 from glob import glob
 import logging
 import os
+import sys
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,16 +16,11 @@ logging.basicConfig(
 )
 
 
-class File:
-    def __init__(self, dataframe, filename):
-        self.df = dataframe
-        self.filename = filename
-
 
 TIME_TODAY = dt.date.today()
 CURRENT_DIR = os.getcwd()
 WORK_DIR = 'files'
-RESULT_DIR = f'files_result_{TIME_TODAY.strftime('%m.%d.%Y')}'
+RESULT_DIR = f'files_result_{TIME_TODAY.strftime("%m.%d.%Y")}'
 
 FILENAMES = [
     'Ежедневный финансовый отчет',
@@ -31,75 +28,103 @@ FILENAMES = [
     'Поставщики комплектующих'
 ]
 
+# ООО ТД Л-Пак
 
-def daily_finance():
-    daily_finance_path = glob(f'{WORK_DIR}/Ежедневный финансовый отчет.xlsx')
-    daily_finance_production_path = glob(f'{WORK_DIR}/Ежедневный_отчет_Склад_*')
-    
-    
+
+def daily_finance_open(
+    app: xw.App,
+    sheet_name='02.06.2025',
+    filename='Ежедневный финансовый отчет.xlsx'
+):
+    daily_finance_path = glob(f'{WORK_DIR}/{filename}')
     
     if not daily_finance_path:
-        logging.error('Не найден файл: Ежедневный финансовый отчет.xlsx')
-    if not daily_finance_production_path:
-        logging.error('Не найден файл: Ежедневный_отчет_Склад_...')
-        
+        logging.error(f'Не найден файл: {filename}')
+        sys.exit(1)
 
-    daily_finance = File(
-        pd.read_excel(daily_finance_path[0], sheet_name=None),
-        os.path.basename(daily_finance_path[0])
-    )
-    daily_finance_production = File(
-        pd.read_excel(daily_finance_production_path[0], sheet_name=None),
-        os.path.basename(daily_finance_production_path[0])
-    )
-    
-    
-    return daily_finance, daily_finance_production
-
-
-def result_add(*data_files):
+    book = app.books.open(daily_finance_path[0])
+    filename = os.path.basename(daily_finance_path[0])
     try:
-        os.mkdir(RESULT_DIR)
-    except FileExistsError:
-        logging.info(f'Папка {RESULT_DIR} уже создана. Повторное создание не нужно')
-        
-    for file in data_files:
-        with pd.ExcelWriter(f'{RESULT_DIR}/{file.filename}') as writer:
-            for sheet_name, sheet_df in file.df.items():
-                sheet_df.to_excel(writer, sheet_name=sheet_name, index=False)
+        try:
+            sheet = book.sheets[sheet_name]
+            logging.info(f'Лист найден: {sheet.name}')
+        except:
+            logging.error(f'Не найден лист: {sheet_name}')
+
+        input_data = daily_finance_search_data(sheet)
+    except:
+        logging.error(f'Ошибка при работе с файлом: {filename}')
+    finally:
+        logging.info(f'Закрытие книги: {filename}')
+        book.close()
+
+    
+    # book.close()
+    # return None
+
+def daily_finance_search_data(sheet: xw.Sheet):
+    """ Ищет данные в заданном диапазоне книги Excel."""
+    start_target_name = 'Расчётный счёт'
+    finish_target_name = 'ИТОГО:'
+
+    search_range = sheet.range('A1:E100')
+
+    found_cell_start = None
+    found_cell_finish = None
+    for cell in search_range:
+        if cell.value == start_target_name:
+            found_cell_start = cell
+        if cell.value == finish_target_name:
+            found_cell_finish = cell
+        if found_cell_start and found_cell_finish:
+            break
+
+    if found_cell_start:
+        print(f"Значение '{start_target_name}' найдено в ячейке {found_cell_start.address}")
+    else:
+        print(f"Значение '{start_target_name}' не найдено")
+        sys.exit(1)
+
+    if found_cell_finish:
+        print(f"Значение '{finish_target_name}' найдено в ячейке {found_cell_finish.address}")
+    else:
+        print(f"Значение '{finish_target_name}' не найдено")
+        sys.exit(1)
+
+    # filter_none_data    
+    data_range = sheet.range(f'C{found_cell_start.row + 5}:D{found_cell_finish.row - 3}')
+
+    detect_none_row = None
+    for cell in data_range:
+        if cell.value is None:
+            detect_none_row = cell.row
+            break
+
+    if not detect_none_row:
+        clear_data_range = data_range
+    else:
+        clear_data_range = sheet.range(f'C{found_cell_start.row + 5}:D{detect_none_row - 1}')
+
+    print(f"Значение данных: {clear_data_range.value}")
+    print(f'Диапазон данных: {clear_data_range.address}')
+    logging.info(f'Данные из листа {sheet.name} получены')
+    return clear_data_range
+
+
+
         
         
 
 def main():
-    app = xw.App(visible=False)
-    daily_finance_path = glob(f'{WORK_DIR}/Ежедневный финансовый отчет.xlsx')[0]
-    daily_finance_production_path = glob(f'{WORK_DIR}/Ежедневный_отчет_Склад_*')[0]
-    wb1 = app.books.open(daily_finance_path) 
-    wb2 = app.books.open(daily_finance_path)
     try:
-        print([sheet.name for sheet in wb1.sheets])
+        app = xw.App(visible=False)
+        daily_finance_open(app)
+        
 
-        wl1 = wb1.sheets['29.05. ']
-        search_range = wl1.range('A1:E100')
-        print(wl1)
-        target = 'Расчётный счёт'
-        found_cell = None
-        for cell in search_range:
-            if cell.value == target:
-                found_cell = cell
-                break
-        # save_path = os.path.join(RESULT_DIR, 'test.xlsx')
-        # print(save_path)
-        # Сохраняем копию с новым именем
-        if found_cell:
-            print(f"Значение '{target}' найдено в ячейке {found_cell.address}")
-        else:
-            print(f"Значение '{target}' не найдено")
+        # daily_finance_path = glob(f'{WORK_DIR}/Ежедневный финансовый отчет.xlsx')[0]
+        # daily_finance_production_path = glob(f'{WORK_DIR}/Ежедневный_отчет_Склад_*')[0]
         ...
-        # wb.api.SaveCopyAs(save_path)     # Сохраняем копию под новым именем
-        # wb.close()
     finally:# Закрываем исходник
-        wb1.close()
         app.quit()
     
 
