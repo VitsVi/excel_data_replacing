@@ -39,7 +39,7 @@ FILENAMES = [
 ]
 
 # ООО ТД Л-Пак
-def component_suppliers_open(
+def component_suppliers_input(
     app: xw.App,
     daily_data,
     storage_data,
@@ -55,8 +55,9 @@ def component_suppliers_open(
     
     try:
         logging.info('Поиск листа с поставщиками и вставка данных')
-        data_value = daily_data.value
 
+        # input DAILY_DATA
+        logging.info('Запись данных из Ежедневного отчета в Поставщики комплектующих')
         for row in daily_data.rows:
             list_found = False
             lower_ground = None
@@ -73,16 +74,10 @@ def component_suppliers_open(
                             formula_cell = sheet_name.range(f'E{cell.row}')
                         if cell.value is not None:
                             lower_ground = sheet_name.range(f'A{cell.row + 1}')
-                            print('------------------------')
-                            print(sheet_name.range('E30').formula, sheet_name.range('E30').address)
-                            print(daily_data.rows.count, daily_data.address)
-                            print(lower_ground)
-                            print(formula_cell)
-                            print(formula_cell.row - lower_ground.row)
                             break
                     if formula_cell.row - lower_ground.row > daily_data.rows.count:
                         try:
-                            lower_ground.value = daily_data.value
+                           # lower_ground.value = daily_data.value
                             book.save()
                         except Exception as e:
                             print(e)
@@ -96,6 +91,53 @@ def component_suppliers_open(
                         print('ELSE')
             if not list_found:
                 logging.error(f'НЕ найден лист: {row[0].value}')
+                
+        # input STORAGE_DATA
+        logging.info('Запись данных из Склад и производство в Поставщики комплектующих')
+
+        for row in storage_data.rows:
+            list_found = False
+            lower_ground = None
+            for sheet_name in book.sheets:
+                if sheet_name.name.strip() == row[1].value.strip():
+                    list_found = True
+                    logging.info(f'Лист найден: {row[1].value}')
+                    sheet = book.sheets[sheet_name.name]
+                    looking_range = sheet.range('A1:A200')
+                    formula_cell = None
+                    for cell in reversed(looking_range):
+                        
+                        if sheet_name.range(f'E{cell.row}').formula and not formula_cell:
+                            formula_cell = sheet_name.range(f'E{cell.row}')
+                        if cell.value is not None:
+                            lower_ground = sheet_name.range(f'A{cell.row + 1}')
+                            break
+                    if formula_cell.row - lower_ground.row > storage_data.rows.count:
+                        try:
+                           # lower_ground.value = storage_data.value
+                            book.save()
+                        except Exception as e:
+                            print(e)
+                        
+                    else:
+                        try:
+                            cell_input_date = sheet_name.range(f'A{lower_ground.row}')
+                            cell_input_product = sheet_name.range(f'B{lower_ground.row}')
+                            cell_input_cost = sheet_name.range(f'C{lower_ground.row}')
+                            cell_input_count = sheet_name.range(f'D{lower_ground.row}')
+                            cell_input_date.value = storage_data.sheet.name
+                            cell_input_product.value = row[0].value
+                            cell_input_cost.value = row[6].value
+                            cell_input_count.value = row[5].value
+                            
+                            cell_input_formule_E = sheet.range(f'E{lower_ground.row}')
+                            cell_input_formule_E.value = f'=C{lower_ground.row}*D{lower_ground.row}'
+                        except Exception as e:
+                            print(e)
+                        book.save()
+                        print('ELSE')
+            if not list_found:
+                logging.error(f'НЕ найден лист: {row[1].value}')
 
     except:
         logging.error(f'Ошибка при работе с файлом: {COMPONENT_SUPPLIERS_FILENAME}')
@@ -191,7 +233,7 @@ def storage_data_search(sheet):
         sys.exit(1)
     
     data_range = sheet.range(
-        f'B{found_cell_start.row + 1}:G{found_cell_finish.row - 1}',
+        f'A{found_cell_start.row + 1}:G{found_cell_finish.row - 1}',
         )
 
 
@@ -287,12 +329,11 @@ def component_suppliers_data(app):
             logging.error(f'Не найден лист: {STORAGE_COMPONENT_SHEET_NAME}')
         try:
             storage_component_input_data = storage_data_search(storage_sheet)
-            print(storage_component_input_data)
         except Exception as e:
             print(e)
         #####
         # Запись полученных данных в поставщики комплектующих
-        component_suppliers_open(
+        component_suppliers_input(
             app, 
             daily_finance_input_data,
             storage_component_input_data
