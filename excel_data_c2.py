@@ -8,6 +8,7 @@ import shutil
 from pathlib import Path
 import re
 
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -137,25 +138,40 @@ def component_suppliers_input(
 
                                 lower_ground += 1
                                 if lower_ground == formula_cell_E.row:
+                                    print('LOWER:', lower_ground)
+                                    #delete formula
+                                    cell_G = sheet_name.range(f'G{lower_ground}')
+                                    cell_E = sheet_name.range(f'E{lower_ground}')
+                                    cell_I = sheet_name.range(f'I{lower_ground}')
+                                    cell_G.formula = None
+                                    cell_E.formula = None
+                                    cell_I.formula = None
+                                    #replace formula
                                     formula_cell_G = sheet_name.range(f'G{lower_ground+5}')
                                     formula_cell_E = sheet_name.range(f'E{lower_ground+5}')
                                     formula_cell_I = sheet_name.range(f'I{lower_ground+5}')
-                                    formula_cell_E.formula = f'=СУММ(E2:E{lower_ground+4})'
-                                    formula_cell_G.formula = f'=СУММ(G2:G{lower_ground+4})'
-                                    formula_cell_I.formula = f'=G{lower_ground+5}-E{lower_ground+5})'
+                                    print(formula_cell_I)
+                                    formula_cell_E.formula = f'=SUM(E2:E{lower_ground+4})'
+                                    formula_cell_G.formula = f'=SUM(G2:G{lower_ground+4})'
+                                    formula_cell_I.formula = f'=G{lower_ground+5}-E{lower_ground+5}'
+                                    print(formula_cell_I.formula)
+                                    main_formula_cell_I = sheet_name.range(f'I{lower_ground-1}')
                                     
-                                    main_formula_cell_I = sheet_name.range(f'I{lower_ground}')
-                                    #shift_formula_down_multiple(sheet_name, main_formula_cell_I, 4)
+                                    autofill_formula_down(sheet_name, main_formula_cell_I, 6)
                                     # formula_cell_I.value = ...
                                     # formula_cell_I = ...
                             except Exception as e:
                                 print(e)
                     book.save()
                     print('ELSE')
+                    if lower_ground:
+                        add_border(sheet_name.range(f'A1:I{lower_ground+4}'))
+
             if not list_found:
                 logging.error(f'НЕ найден лист: {row[1].value}')
             # убираем дублирование проверок
-            used_storage_sheet.append(row[1].value.strip())
+            #used_storage_sheet.append(row[1].value.strip())
+        
 
     except:
         logging.error(f'Ошибка при работе с файлом: {COMPONENT_SUPPLIERS_FILENAME}')
@@ -392,33 +408,36 @@ def copy_component_suppliers():
     except Exception as e:
         print(e)
         logging.error(f'Ошибка копирования файла {COMPONENT_SUPPLIERS_FILENAME}')
+
+
+def add_border(range_obj, weight=2, linestyle=1):
+    """
+    Добавляет рамки диапазону через .api (COM) — без прямого импорта win32.
+    :param range_obj: xlwings Range
+    :param weight: 2 = xlMedium
+    :param linestyle: 1 = xlContinuous
+    """
+    borders = range_obj.api.Borders
+    for i in range(7, 13):  # xlEdgeLeft=7 до xlInsideHorizontal=12
+        borders(i).LineStyle = linestyle
+        borders(i).Weight = weight
+
+def autofill_formula_down(sheet, cell_address, num_rows):
+    """
+    Протягивает формулу вниз с автокоррекцией относительных ссылок (аналог drag в Excel).
     
+    :param sheet: лист xlwings
+    :param cell_address: строка вида "E25" — начальная ячейка с формулой
+    :param num_rows: сколько строк вниз протянуть (включая начальную)
+    """
+    start_cell = sheet.range(cell_address)
+    formula = start_cell.formula
 
-# def shift_formula_down_multiple(cell, shift_count=1):
-#     """
-#     Сдвигает формулу вниз и записывает новую формулу в каждую строку ниже.
-    
-#     :param cell: xlwings.Range — ячейка с оригинальной формулой
-#     :param shift_count: int — сколько раз сдвигать вниз (и писать каждый раз)
-#     """
-#     original_formula = cell.formula
-#     if not original_formula:
-#         print("Формула пуста.")
-#         return
+    # Определяем диапазон, который надо "залить" формулой
+    fill_range = sheet.range(cell_address).expand('right').resize(num_rows, 1)
 
-#     pattern = r'(\$?)([A-Z]{1,3})(\$?)(\d+)'
-
-#     for i in range(1, shift_count + 1):
-#         def repl(match):
-#             abs_col, col, abs_row, row = match.groups()
-#             row = int(row)
-#             new_row = row if abs_row == '$' else row + i
-#             return f"{abs_col}{col}{abs_row}{new_row}"
-
-#         new_formula = re.sub(pattern, repl, original_formula)
-#         target_cell = cell.offset(row_offset=i)
-#         target_cell.formula = new_formula
-#         print(f"{target_cell.address} = {new_formula}")
+    # Применяем формулу ко всему диапазону (как автозаполнение)
+    fill_range.formula = formula
         
         
 
@@ -427,12 +446,8 @@ def main():
         app = xw.App(visible=False)
         copy_component_suppliers()
         component_suppliers_data(app)
-        
 
-        # daily_finance_path = glob(f'{WORK_DIR}/Ежедневный финансовый отчет.xlsx')[0]
-        # daily_finance_production_path = glob(f'{WORK_DIR}/Ежедневный_отчет_Склад_*')[0]
-        ...
-    finally:# Закрываем исходник
+    finally:
         app.quit()
     
 
