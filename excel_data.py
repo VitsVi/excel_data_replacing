@@ -170,7 +170,7 @@ def component_suppliers_input(
             if not list_found:
                 logging.error(f'НЕ найден лист: {row[1].value}')
             # убираем дублирование проверок
-            #used_storage_sheet.append(row[1].value.strip())
+            used_storage_sheet.append(row[1].value.strip())
         
 
     except:
