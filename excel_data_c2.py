@@ -6,6 +6,7 @@ import os
 import sys
 import shutil
 from pathlib import Path
+import re
 
 logging.basicConfig(
     level=logging.INFO,
@@ -94,8 +95,10 @@ def component_suppliers_input(
                 
         # input STORAGE_DATA
         logging.info('Запись данных из Склад и производство в Поставщики комплектующих')
-
+        used_storage_sheet = []
         for row in storage_data.rows:
+            if row[1].value.strip() in used_storage_sheet:
+                continue
             list_found = False
             lower_ground = None
             for sheet_name in book.sheets:
@@ -104,40 +107,55 @@ def component_suppliers_input(
                     logging.info(f'Лист найден: {row[1].value}')
                     sheet = book.sheets[sheet_name.name]
                     looking_range = sheet.range('A1:A200')
-                    formula_cell = None
+                    formula_cell_E = None
                     for cell in reversed(looking_range):
                         
-                        if sheet_name.range(f'E{cell.row}').formula and not formula_cell:
-                            formula_cell = sheet_name.range(f'E{cell.row}')
+                        if sheet_name.range(f'E{cell.row}').formula and not formula_cell_E:
+                            try:
+                                formula_cell_E = sheet_name.range(f'E{cell.row}')
+                            except Exception as e:
+                                print(e)
                         if cell.value is not None:
-                            lower_ground = sheet_name.range(f'A{cell.row + 1}')
+                            lower_ground = cell.row + 1
                             break
-                    if formula_cell.row - lower_ground.row > storage_data.rows.count:
-                        try:
-                           # lower_ground.value = storage_data.value
-                            book.save()
-                        except Exception as e:
-                            print(e)
+
                         
-                    else:
-                        try:
-                            cell_input_date = sheet_name.range(f'A{lower_ground.row}')
-                            cell_input_product = sheet_name.range(f'B{lower_ground.row}')
-                            cell_input_cost = sheet_name.range(f'C{lower_ground.row}')
-                            cell_input_count = sheet_name.range(f'D{lower_ground.row}')
-                            cell_input_date.value = storage_data.sheet.name
-                            cell_input_product.value = row[0].value
-                            cell_input_cost.value = row[6].value
-                            cell_input_count.value = row[5].value
-                            
-                            cell_input_formule_E = sheet.range(f'E{lower_ground.row}')
-                            cell_input_formule_E.value = f'=C{lower_ground.row}*D{lower_ground.row}'
-                        except Exception as e:
-                            print(e)
-                        book.save()
-                        print('ELSE')
+                    for row_in in storage_data.rows:
+                        if sheet_name.name.strip() == row_in[1].value.strip() and row_in[4].value:
+                            try:
+                                cell_input_date = sheet_name.range(f'A{lower_ground}')
+                                cell_input_product = sheet_name.range(f'B{lower_ground}')
+                                cell_input_cost = sheet_name.range(f'D{lower_ground}')
+                                cell_input_count = sheet_name.range(f'C{lower_ground}')
+                                cell_input_date.value = storage_data.sheet.name
+                                cell_input_product.value = row_in[0].value
+                                cell_input_cost.value = row_in[6].value
+                                cell_input_count.value = row_in[4].value
+                                
+                                cell_input_formule_E = sheet.range(f'E{lower_ground}')
+                                cell_input_formule_E.value = f'=C{lower_ground}*D{lower_ground}'
+
+                                lower_ground += 1
+                                if lower_ground == formula_cell_E.row:
+                                    formula_cell_G = sheet_name.range(f'G{lower_ground+5}')
+                                    formula_cell_E = sheet_name.range(f'E{lower_ground+5}')
+                                    formula_cell_I = sheet_name.range(f'I{lower_ground+5}')
+                                    formula_cell_E.formula = f'=СУММ(E2:E{lower_ground+4})'
+                                    formula_cell_G.formula = f'=СУММ(G2:G{lower_ground+4})'
+                                    formula_cell_I.formula = f'=G{lower_ground+5}-E{lower_ground+5})'
+                                    
+                                    main_formula_cell_I = sheet_name.range(f'I{lower_ground}')
+                                    #shift_formula_down_multiple(sheet_name, main_formula_cell_I, 4)
+                                    # formula_cell_I.value = ...
+                                    # formula_cell_I = ...
+                            except Exception as e:
+                                print(e)
+                    book.save()
+                    print('ELSE')
             if not list_found:
                 logging.error(f'НЕ найден лист: {row[1].value}')
+            # убираем дублирование проверок
+            used_storage_sheet.append(row[1].value.strip())
 
     except:
         logging.error(f'Ошибка при работе с файлом: {COMPONENT_SUPPLIERS_FILENAME}')
@@ -376,6 +394,31 @@ def copy_component_suppliers():
         logging.error(f'Ошибка копирования файла {COMPONENT_SUPPLIERS_FILENAME}')
     
 
+# def shift_formula_down_multiple(cell, shift_count=1):
+#     """
+#     Сдвигает формулу вниз и записывает новую формулу в каждую строку ниже.
+    
+#     :param cell: xlwings.Range — ячейка с оригинальной формулой
+#     :param shift_count: int — сколько раз сдвигать вниз (и писать каждый раз)
+#     """
+#     original_formula = cell.formula
+#     if not original_formula:
+#         print("Формула пуста.")
+#         return
+
+#     pattern = r'(\$?)([A-Z]{1,3})(\$?)(\d+)'
+
+#     for i in range(1, shift_count + 1):
+#         def repl(match):
+#             abs_col, col, abs_row, row = match.groups()
+#             row = int(row)
+#             new_row = row if abs_row == '$' else row + i
+#             return f"{abs_col}{col}{abs_row}{new_row}"
+
+#         new_formula = re.sub(pattern, repl, original_formula)
+#         target_cell = cell.offset(row_offset=i)
+#         target_cell.formula = new_formula
+#         print(f"{target_cell.address} = {new_formula}")
         
         
 
