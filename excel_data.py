@@ -4,7 +4,7 @@ from glob import glob
 import logging
 import os
 from first_component import copy_component_suppliers, component_suppliers_data
-
+from second_component import copy_electricity, electicity_data
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,9 +29,12 @@ def main():
     try:
         logging.info("Запуск приложения Excel")
         app = xw.App(visible=False)
-        copy_component_suppliers()
-        component_suppliers_data(app)
-
+        logging.info("РАБОТА С ФАЙЛОМ ПОСТАВЩИКИ КОМЛПЕКТУЮЩИХ")
+        #copy_component_suppliers()
+        #component_suppliers_data(app)
+        logging.info("РАБОТА С ФАЙЛОМ ЭЛЕКТРИЧЕСТВО")
+        copy_electricity()
+        electicity_data(app)
     finally:
         logging.info("Закрытие приложения Excel")
         app.quit()

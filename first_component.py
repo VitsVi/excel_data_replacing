@@ -4,17 +4,22 @@ import shutil
 import xlwings as xw
 from glob import glob
 import logging
-from constants import RESULT_DIR, WORK_DIR
 import os
+from constants import (
+    RESULT_DIR, 
+    WORK_DIR, 
+    DAILY_FINANCE_SHEET_NAME,
+    DAILY_FINANCE_FILENAME,
+
+    STORAGE_COMPONENT_SHEET_NAME,
+    STORAGE_COMPONENT_FILENAME,
+)
+
 
 
 log = logging.getLogger(__name__)
 
-DAILY_FINANCE_SHEET_NAME = '02.06.2025'
-DAILY_FINANCE_FILENAME = 'Ежедневный финансовый отчет.xlsx'
 
-STORAGE_COMPONENT_SHEET_NAME = '20.05.2025'
-STORAGE_COMPONENT_FILENAME = 'Ежедневный_отчет_Склад_*'
 
 COMPONENT_SUPPLIERS_FILENAME = 'Поставщики комплектующих.xlsx'
 
@@ -165,7 +170,7 @@ def component_suppliers_input(
     # book.close()
     # return None
 
-def daily_finance_search_data(sheet: xw.Sheet):
+def daily_finance_data_search(sheet: xw.Sheet):
     """Поиск данных в файле Ежедневный отчет"""
 
     start_target_name = 'Расчётный счёт'
@@ -255,55 +260,6 @@ def storage_data_search(sheet):
     log.info(f'Данные из листа {sheet.name} получены')
     return data_range
 
-def daily_and_storage_data_search(sheet):
-    """Поиск данных в файле Склад и производство"""
-
-    start_target_name = 'Материалы'
-    finish_target_name = 'ИТОГО'
-
-    search_range = sheet.range('A1:A500')
-
-    found_cell_start = None
-    found_cell_finish = None
-    for cell in search_range:
-        if cell.value == start_target_name:
-            found_cell_start = cell
-        if cell.value == finish_target_name and found_cell_start is not None:
-            found_cell_finish = cell
-        if found_cell_start and found_cell_finish:
-            break
-
-    if found_cell_start:
-        print(f"Значение '{start_target_name}' найдено в ячейке {found_cell_start.address}")
-    else:
-        print(f"Значение '{start_target_name}' не найдено")
-        sys.exit(1)
-
-    if found_cell_finish:
-        print(f"Значение '{finish_target_name}' найдено в ячейке {found_cell_finish.address}")
-    else:
-        print(f"Значение '{finish_target_name}' не найдено")
-        sys.exit(1)
-
-    # filter_none_data    
-    data_range = sheet.range(f'C{found_cell_start.row + 5}:D{found_cell_finish.row - 3}')
-
-    detect_none_row = None
-    for cell in data_range:
-        if cell.value is None:
-            detect_none_row = cell.row
-            break
-
-    if not detect_none_row:
-        clear_data_range = data_range
-    else:
-        clear_data_range = sheet.range(f'C{found_cell_start.row + 5}:D{detect_none_row - 1}')
-
-    print(f"Значение данных: {clear_data_range.value}")
-    print(f'Диапазон данных: {clear_data_range.address}')
-    log.info(f'Данные из листа {sheet.name} получены')
-    return clear_data_range
-
 
 def component_suppliers_data(app):
     """Запись данных в Поставщики комплектующих"""
@@ -332,7 +288,7 @@ def component_suppliers_data(app):
         except:
             log.error(f'Не найден лист: {DAILY_FINANCE_SHEET_NAME}')
 
-        daily_finance_input_data = daily_finance_search_data(daily_sheet)
+        daily_finance_input_data = daily_finance_data_search(daily_sheet)
         
         # Склад и производство получение данных
         try:

@@ -12,3 +12,10 @@ FILENAMES = [
     'Ежедневный_отчет_Склад_*',
     'Поставщики комплектующих'
 ]
+
+
+DAILY_FINANCE_SHEET_NAME = '02.06.2025'
+DAILY_FINANCE_FILENAME = 'Ежедневный финансовый отчет.xlsx'
+
+STORAGE_COMPONENT_SHEET_NAME = '20.05.2025'
+STORAGE_COMPONENT_FILENAME = 'Ежедневный_отчет_Склад_*'
