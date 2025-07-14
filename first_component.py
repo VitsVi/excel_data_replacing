@@ -14,6 +14,7 @@ from constants import (
     STORAGE_COMPONENT_SHEET_NAME,
     STORAGE_COMPONENT_FILENAME,
 )
+from dopfuncs import copy_file_to_result
 
 
 
@@ -30,6 +31,7 @@ def component_suppliers_input(
     daily_data,
     storage_data,
 ):
+    copy_file_to_result(COMPONENT_SUPPLIERS_FILENAME)
     component_suppliers_path = glob(f'{RESULT_DIR}/{COMPONENT_SUPPLIERS_FILENAME}')
     
     if not component_suppliers_path:
@@ -278,7 +280,7 @@ def component_suppliers_data(app):
     daily_finance_book = app.books.open(daily_finance_path[0])
     log.info(f'Открытие книги: {DAILY_FINANCE_FILENAME}')
     storage_book = app.books.open(storage_component_path[0])
-    log.info(f'Открытие книги: {STORAGE_COMPONENT_SHEET_NAME}')
+    log.info(f'Открытие книги: {STORAGE_COMPONENT_FILENAME}')
 
     try:
         # Ежедневный отчет получение данных
@@ -320,26 +322,3 @@ def component_suppliers_data(app):
         )
         daily_finance_book.close()
         storage_book.close()
-
-
-
-def copy_component_suppliers():
-    try:
-        os.mkdir(RESULT_DIR)
-    except:
-        log.info(f'Папка {RESULT_DIR} уже создана, повторное создание не нужно')
-    
-    orig_path = glob(f'{WORK_DIR}/{COMPONENT_SUPPLIERS_FILENAME}')
-    #abs_path = Path(__file__).resolve().parent
-    result_path = f'{RESULT_DIR}/{COMPONENT_SUPPLIERS_FILENAME}'
-    print(result_path)
-    
-    if not orig_path:
-        log.error(f'Не найден файл: {COMPONENT_SUPPLIERS_FILENAME}')
-        sys.exit(1)
-    try:
-        shutil.copy2(orig_path[0], result_path)
-        log.info(f'{COMPONENT_SUPPLIERS_FILENAME} - Файл скопирован в {RESULT_DIR}')
-    except Exception as e:
-        print(e)
-        log.error(f'Ошибка копирования файла {COMPONENT_SUPPLIERS_FILENAME}')

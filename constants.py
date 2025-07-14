@@ -19,3 +19,6 @@ DAILY_FINANCE_FILENAME = 'Ежедневный финансовый отче
 
 STORAGE_COMPONENT_SHEET_NAME = '20.05.2025'
 STORAGE_COMPONENT_FILENAME = 'Ежедневный_отчет_Склад_*'
+
+# выбор в электричество из расчетного счета
+ELECTRICITY_COMPANY = 'ИП Савина О.В. Электроэнергия'

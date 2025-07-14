@@ -1,3 +1,13 @@
+from constants import RESULT_DIR, WORK_DIR
+import logging
+from glob import glob
+import os
+import shutil
+import sys
+
+
+log = logging.getLogger(__name__)
+
 def autofill_formula_down(sheet, cell_address, num_rows):
     """
     Протягивает формулу вниз с автокоррекцией относительных ссылок (аналог drag в Excel).
@@ -27,3 +37,24 @@ def add_border(range_obj, weight=2, linestyle=1):
     for i in range(7, 13):  # xlEdgeLeft=7 до xlInsideHorizontal=12
         borders(i).LineStyle = linestyle
         borders(i).Weight = weight
+
+
+def copy_file_to_result(filename):
+    try:
+        os.mkdir(RESULT_DIR)
+    except:
+        log.info(f'Папка {RESULT_DIR} уже создана, повторное создание не нужно')
+    
+    orig_path = glob(f'{WORK_DIR}/{filename}')
+    #abs_path = Path(__file__).resolve().parent
+
+    if not orig_path:
+        log.error(f'Не найден файл: {filename}')
+        sys.exit(1)
+    try:
+        result_path = f'{RESULT_DIR}/{os.path.basename(orig_path[0])}'
+        shutil.copy2(orig_path[0], result_path)
+        log.info(f'{filename} - Файл скопирован в {RESULT_DIR}')
+    except Exception as e:
+        print(e)
+        log.error(f'Ошибка копирования файла {filename}')

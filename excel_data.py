@@ -3,8 +3,10 @@ import datetime as dt
 from glob import glob
 import logging
 import os
-from first_component import copy_component_suppliers, component_suppliers_data
-from second_component import copy_electricity, electicity_data
+from first_component import component_suppliers_data
+from second_component import electicity_data
+from third_component import services_to_us_data
+
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,15 +31,17 @@ def main():
     try:
         logging.info("Запуск приложения Excel")
         app = xw.App(visible=False)
-        logging.info("РАБОТА С ФАЙЛОМ ПОСТАВЩИКИ КОМЛПЕКТУЮЩИХ")
-        #copy_component_suppliers()
+        #logging.info("РАБОТА С ФАЙЛОМ ПОСТАВЩИКИ КОМЛПЕКТУЮЩИХ")
         #component_suppliers_data(app)
         logging.info("РАБОТА С ФАЙЛОМ ЭЛЕКТРИЧЕСТВО")
-        copy_electricity()
         electicity_data(app)
+        #logging.info("РАБОТА С ФАЙЛОМ УСЛУГИ НАМ")
+        #services_to_us_data(app)
+        
     finally:
         logging.info("Закрытие приложения Excel")
         app.quit()
+        input("Завершение работы. Нажмите любую клавишу для продолжения...")
     
 
 
