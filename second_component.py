@@ -54,8 +54,6 @@ def electicity_data(app):
     
 
         # выход из функции электричества, если нет компании
-        if not daily_finance_input_data:
-            return
         
         # Склад и производство получение данных
         try:
@@ -130,7 +128,7 @@ def daily_finance_data_search(sheet: xw.Sheet):
     for idx, value in enumerate(column_c_values):
         if value == ELECTRICITY_COMPANY:
             found_row = data_range.rows[idx].row
-            log.error(f'Компания "{ELECTRICITY_COMPANY}" найдена в строке: {found_row}')
+            log.info(f'Компания "{ELECTRICITY_COMPANY}" найдена в строке: {found_row}')
             break
     else:
         log.error(f'Компания "{ELECTRICITY_COMPANY}" не найдена в Расчетном счете')
@@ -210,15 +208,18 @@ def electicity_input(
         #заполнение новых данных
 
         # input DAILY_DATA
-        try:
-            log.info('Запись данных из Ежедневного отчета')
-            sheet.range(f'A{end_row}').value = daily_data.sheet.name   
-            sheet.range(f'H{end_row}').value = daily_data[1].value
-            sheet.range(f'N{end_row}').value = daily_data[1].value
-        except:
-            log.info('Ошибка записи из Ежедневного отчета')
+        if daily_data:
+            try:
+                log.info('Запись данных из Ежедневного отчета')  
+                sheet.range(f'H{end_row}').value = daily_data[1].value
+                sheet.range(f'N{end_row}').value = daily_data[1].value
+            except:
+                log.info('Ошибка записи из Ежедневного отчета')
+        else:
+            log.info('Пропускается заполнение данных из Расчетного Счета(данные не найдены)')
         try:
             log.info('Запись данных из Склад и Производство')
+            sheet.range(f'A{end_row}').value = storage_data.sheet.name 
             sheet.range(f'B{end_row}').value = storage_data[0].value
             sheet.range(f'C{end_row}').value = storage_data[1].value
             sheet.range(f'J{end_row}').value = storage_data[5].value
