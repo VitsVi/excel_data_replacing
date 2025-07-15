@@ -1,6 +1,6 @@
 import datetime as dt
 import os
-
+import unicodedata
 
 TIME_TODAY = dt.date.today()
 CURRENT_DIR = os.getcwd()
@@ -15,10 +15,13 @@ FILENAMES = [
 
 
 DAILY_FINANCE_SHEET_NAME = '02.06.2025'
-DAILY_FINANCE_FILENAME = 'Ежедневный финансовый отчет.xlsx'
+DAILY_FINANCE_FILENAME = 'Ежедневны* финансовы* отчет.xlsx'
+#DAILY_FINANCE_FILENAME = unicodedata.normalize('NFC', DAILY_FINANCE_FILENAME)
+print(DAILY_FINANCE_FILENAME)
+
 
 STORAGE_COMPONENT_SHEET_NAME = '20.05.2025'
-STORAGE_COMPONENT_FILENAME = 'Ежедневный_отчет_Склад_*'
+STORAGE_COMPONENT_FILENAME = 'Ежедневны*_отчет_Склад_*'
 
 # выбор в электричество из расчетного счета
 ELECTRICITY_COMPANY = 'ИП Савина О.В. Электроэнергия'

@@ -25,7 +25,6 @@ ELECTRICITY_FILENAME = 'Электричество*.xlsx'
         
 def electicity_data(app):
     """Запись данных в Электричество"""
-    
     daily_finance_path = glob(f'{WORK_DIR}/{DAILY_FINANCE_FILENAME}')
     storage_component_path = glob(f'{WORK_DIR}/{STORAGE_COMPONENT_FILENAME}')
 
@@ -34,7 +33,7 @@ def electicity_data(app):
         sys.exit(1)
 
     if not storage_component_path:
-        log.error(f'Не найден файл: {DAILY_FINANCE_FILENAME}')
+        log.error(f'Не найден файл: {STORAGE_COMPONENT_FILENAME}')
         sys.exit(1)
         
     daily_finance_book = app.books.open(daily_finance_path[0])

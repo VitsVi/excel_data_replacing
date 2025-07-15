@@ -274,7 +274,7 @@ def component_suppliers_data(app):
         sys.exit(1)
 
     if not storage_component_path:
-        log.error(f'Не найден файл: {DAILY_FINANCE_FILENAME}')
+        log.error(f'Не найден файл: {STORAGE_COMPONENT_FILENAME}')
         sys.exit(1)
         
     daily_finance_book = app.books.open(daily_finance_path[0])

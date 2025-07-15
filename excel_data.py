@@ -6,7 +6,7 @@ import os
 from first_component import component_suppliers_data
 from second_component import electicity_data
 from third_component import services_to_us_data
-
+from fourth_component import daily_buyers_data
 
 logging.basicConfig(
     level=logging.INFO,
@@ -31,13 +31,14 @@ def main():
     try:
         logging.info("Запуск приложения Excel")
         app = xw.App(visible=False)
-        #logging.info("РАБОТА С ФАЙЛОМ ПОСТАВЩИКИ КОМЛПЕКТУЮЩИХ")
-        #component_suppliers_data(app)
-        logging.info("РАБОТА С ФАЙЛОМ ЭЛЕКТРИЧЕСТВО")
-        electicity_data(app)
-        #logging.info("РАБОТА С ФАЙЛОМ УСЛУГИ НАМ")
+        # logging.info("РАБОТА С ФАЙЛОМ ПОСТАВЩИКИ КОМЛПЕКТУЮЩИХ")
+        # component_suppliers_data(app)
+        # logging.info("РАБОТА С ФАЙЛОМ ЭЛЕКТРИЧЕСТВО")
+        # electicity_data(app)
+        # logging.info("РАБОТА С ФАЙЛОМ УСЛУГИ НАМ")
         #services_to_us_data(app)
-        
+        logging.info("РАБОТА С ФАЙЛОМ ЕЖЕДНЕВНЫЕ ПОКУПАТЕЛИ")
+        daily_buyers_data(app)
     finally:
         logging.info("Закрытие приложения Excel")
         app.quit()
