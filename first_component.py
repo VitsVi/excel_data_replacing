@@ -265,7 +265,7 @@ def storage_data_search(sheet):
 
 def component_suppliers_data(app):
     """Запись данных в Поставщики комплектующих"""
-    
+    logging.info("РАБОТА С ФАЙЛОМ ПОСТАВЩИКИ КОМЛПЕКТУЮЩИХ")
     daily_finance_path = glob(f'{WORK_DIR}/{DAILY_FINANCE_FILENAME}')
     storage_component_path = glob(f'{WORK_DIR}/{STORAGE_COMPONENT_FILENAME}')
 

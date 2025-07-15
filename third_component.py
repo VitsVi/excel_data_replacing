@@ -224,7 +224,7 @@ def daily_finance_data_search_second(sheet: xw.Sheet):
 
 def services_to_us_data(app):
     """Запись данных в Поставщики комплектующих"""
-    
+    logging.info("РАБОТА С ФАЙЛОМ УСЛУГИ НАМ")
     daily_finance_path = glob(f'{WORK_DIR}/{DAILY_FINANCE_FILENAME}')
     storage_component_path = glob(f'{WORK_DIR}/{STORAGE_COMPONENT_FILENAME}')
 

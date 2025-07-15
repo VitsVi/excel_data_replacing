@@ -25,6 +25,7 @@ ELECTRICITY_FILENAME = 'Электричество*.xlsx'
         
 def electicity_data(app):
     """Запись данных в Электричество"""
+    logging.info("РАБОТА С ФАЙЛОМ ЭЛЕКТРИЧЕСТВО")
     daily_finance_path = glob(f'{WORK_DIR}/{DAILY_FINANCE_FILENAME}')
     storage_component_path = glob(f'{WORK_DIR}/{STORAGE_COMPONENT_FILENAME}')
 
