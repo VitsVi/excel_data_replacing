@@ -76,7 +76,6 @@ def component_suppliers_input(
                         cell_input_data.value = row[1].value
                         cell_input_date.value = daily_data.sheet.name
                         book.save()
-                        print('ELSE')
             if not list_found:
                 log.error(f'НЕ найден лист: {row[0].value}')
                 
@@ -149,7 +148,6 @@ def component_suppliers_input(
                             except Exception as e:
                                 print(e)
                     book.save()
-                    print('ELSE')
                     if lower_ground:
                         add_border(sheet_name.range(f'A1:I{lower_ground+4}'))
 

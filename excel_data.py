@@ -9,6 +9,7 @@ from first_component import component_suppliers_data
 from second_component import electicity_data
 from third_component import services_to_us_data
 from fourth_component import daily_buyers_data
+from fifth_component import storage_material_data
 
 init()
 
@@ -49,13 +50,15 @@ TEXT_OUT = {
     '2': 'РАБОТА С ФАЙЛОМ ЭЛЕКТРИЧЕСТВО',
     '3': 'РАБОТА С ФАЙЛОМ УСЛУГИ НАМ',
     '4': 'РАБОТА С ФАЙЛОМ ЕЖЕДНЕВНЫЕ ПОКУПАТЕЛИ',
-    '0': 'ЗАПУСК ВЫБРАННЫХ ПРОГРАММ'
+    '5': 'РАБОТА С ФАЙЛОМ СКЛАД СЫРЬЕ',
+    '0': 'ЗАПУСК ВЫБРАННЫХ ПРОГРАММ',
 }
 CHOOSEN_FILES = {
     '1': component_suppliers_data,
     '2': electicity_data,
     '3': services_to_us_data,
-    '4': daily_buyers_data
+    '4': daily_buyers_data,
+    '5': storage_material_data,
 }
 
 def funcs_manager():
@@ -131,10 +134,11 @@ def funcs_runner(app: xw.App, result):
 
 def main():
     try:
-        result = funcs_manager()
+        #result = funcs_manager()
         logging.info("Запуск приложения Excel")
         app = xw.App(visible=False)
-        funcs_runner(app, result)
+        #funcs_runner(app, result)
+        storage_material_data(app)
         # component_suppliers_data(app)
 
         # electicity_data(app)
