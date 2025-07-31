@@ -10,6 +10,8 @@ from second_component import electicity_data
 from third_component import services_to_us_data
 from fourth_component import daily_buyers_data
 from fifth_component import storage_material_data
+from sixth_component import storage_complect_data
+
 
 init()
 
@@ -51,6 +53,7 @@ TEXT_OUT = {
     '3': 'РАБОТА С ФАЙЛОМ УСЛУГИ НАМ',
     '4': 'РАБОТА С ФАЙЛОМ ЕЖЕДНЕВНЫЕ ПОКУПАТЕЛИ',
     '5': 'РАБОТА С ФАЙЛОМ СКЛАД СЫРЬЕ',
+    '6': 'РАБОТА С ФАЙЛОМ СКЛАД КОМПЛЕКТ',
     '0': 'ЗАПУСК ВЫБРАННЫХ ПРОГРАММ',
 }
 CHOOSEN_FILES = {
@@ -59,6 +62,7 @@ CHOOSEN_FILES = {
     '3': services_to_us_data,
     '4': daily_buyers_data,
     '5': storage_material_data,
+    '6': storage_complect_data,
 }
 
 def funcs_manager():
@@ -139,6 +143,7 @@ def main():
         app = xw.App(visible=False)
         #funcs_runner(app, result)
         storage_material_data(app)
+        storage_complect_data(app)
         # component_suppliers_data(app)
 
         # electicity_data(app)
