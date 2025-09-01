@@ -8,7 +8,6 @@ import os
 from constants import (
     RESULT_DIR, 
     WORK_DIR, 
-    DAILY_FINANCE_SHEET_NAME,
     DAILY_FINANCE_FILENAME,
 )
 from dopfuncs import copy_file_to_result
@@ -42,31 +41,95 @@ def file_input(
     try:
         log.info(f'Запись данных из Ежедневного финансового отчета в {FILENAME}')
         log.info('Поиск листа и вставка данных')
+        try:
+            sheet_1 = book.sheets['Табель начисления ЗП']
+        except:
+            log.error(f'Не найден лист "Табель начисления ЗП" в {FILENAME}')
 
-        if data_1:
-            try:
-                sheet_1 = book.sheets['склад']
-            except:
-                log.error(f'Не найден лист склад в {FILENAME}')
-            looking_range = sheet_1.range('A1:A50')
-            first_row = None
-            second_row = None
-            for cell in reversed(looking_range):
-                if 'на сумму' in str(cell.value):
-                    first_row = cell.row
-                if 'в единицах' in str(cell.value):
-                    second_row = cell.row
-                if first_row and second_row:
-                    break
-            if first_row and second_row:
-                first_cell = sheet_1.range(f'D{first_row}')
-                second_cell = sheet_1.range(f'D{second_row}')
-                first_cell.formula = f'{first_cell.formula}+{data_1[6].value}'
-                second_cell.formula = f'{second_cell.formula}+{data_1[1].value}'
-                second_cell.formula = f'{second_cell.formula}-{data_1[2].value}'
-            else:
-                log.info('Ошибка записи. Не найдены строки "на сумму", "в единицах"')
-                raise
+        first_date = True # первая вставка даты в таблицу листа
+
+        ### поиск последней записи
+        
+        looking_range = sheet_1.range('B1:B700')
+        back_row = None
+        for cell in reversed(looking_range):
+            if cell.value is not None:
+                back_row = cell.row
+                break
+        ### вставка данных
+
+        for row in data_1.value:   # row = список значений в строке
+            if row[0] is not None:
+                if 'зарплата' in row[0].lower():
+                    autofill_formula_down(sheet_1, f'B{back_row}', 2)
+                    autofill_formula_down(sheet_1, f'C{back_row}', 2)
+                    autofill_formula_down(sheet_1, f'E{back_row - 1}', 2)
+                    add_border(sheet_1.range(f'A{back_row}:F{back_row+1}'))
+                    sheet_1.range(f'B{back_row}').formula = None
+                    sheet_1.range(f'C{back_row}').formula = None
+                    if first_date:
+                        sheet_1.range(f'A{back_row}').value = data_1.sheet.name
+                        first_date = False
+                    sheet_1.range(f'C{back_row}').value = row[3]
+                    sheet_1.range(f'F{back_row}').value = row[0]
+                    back_row += 1
+
+        # for data-2
+        for row in data_2.value:   # row = список значений в строке
+            if row[0] is not None:
+                if 'зарплата' in row[0].lower():
+                    autofill_formula_down(sheet_1, f'B{back_row}', 2)
+                    autofill_formula_down(sheet_1, f'C{back_row}', 2)
+                    autofill_formula_down(sheet_1, f'E{back_row - 1}', 2)
+                    add_border(sheet_1.range(f'A{back_row}:F{back_row+1}'))
+                    sheet_1.range(f'B{back_row}').formula = None
+                    sheet_1.range(f'C{back_row}').formula = None
+                    if first_date:
+                        sheet_1.range(f'A{back_row}').value = data_1.sheet.name
+                        first_date = False
+                    sheet_1.range(f'C{back_row}').value = row[1]
+                    sheet_1.range(f'F{back_row}').value = row[0]
+                    back_row += 1
+            if row[4] is not None:
+                if 'зарплата' in row[4].lower():
+                    autofill_formula_down(sheet_1, f'B{back_row}', 2)
+                    autofill_formula_down(sheet_1, f'C{back_row}', 2)
+                    autofill_formula_down(sheet_1, f'E{back_row - 1}', 2)
+                    add_border(sheet_1.range(f'A{back_row}:F{back_row+1}'))
+                    sheet_1.range(f'B{back_row}').formula = None
+                    sheet_1.range(f'C{back_row}').formula = None
+                    if first_date:
+                        sheet_1.range(f'A{back_row}').value = data_1.sheet.name
+                        first_date = False
+                    sheet_1.range(f'C{back_row}').value = row[5]
+                    sheet_1.range(f'F{back_row}').value = row[4]
+                    back_row += 1
+
+            
+                    
+
+
+        # if data_1:
+
+
+        #     first_row = None
+        #     second_row = None
+        #     for cell in reversed(looking_range):
+        #         if 'на сумму' in str(cell.value):
+        #             first_row = cell.row
+        #         if 'в единицах' in str(cell.value):
+        #             second_row = cell.row
+        #         if first_row and second_row:
+        #             break
+        #     if first_row and second_row:
+        #         first_cell = sheet_1.range(f'D{first_row}')
+        #         second_cell = sheet_1.range(f'D{second_row}')
+        #         first_cell.formula = f'{first_cell.formula}+{data_1[6].value}'
+        #         second_cell.formula = f'{second_cell.formula}+{data_1[1].value}'
+        #         second_cell.formula = f'{second_cell.formula}-{data_1[2].value}'
+        #     else:
+        #         log.info('Ошибка записи. Не найдены строки "на сумму", "в единицах"')
+        #         raise
 
     except:
         log.error(f'Ошибка при работе с файлом: {FILENAME}')
@@ -128,7 +191,7 @@ def looking_data(start_target_name, finish_target_name, sheet, alternative=True)
     return clear_data_range
 
 
-def we_services_and_report_card(app):
+def we_services_and_report_card(app, date_sheet):
     """Запись данных в Поставщики комплектующих"""
     logging.info(f"РАБОТА С ФАЙЛОМ {FILENAME}")
 
@@ -144,10 +207,10 @@ def we_services_and_report_card(app):
     try:
         # Склад и производство получение данных
         try:
-            sheet = storage_book.sheets[DAILY_FINANCE_SHEET_NAME]
+            sheet = storage_book.sheets[date_sheet]
             log.info(f'Лист найден: {sheet.name}')
         except:
-            log.error(f'Не найден лист: {DAILY_FINANCE_SHEET_NAME}')
+            log.error(f'Не найден лист: {date_sheet}')
 
         input_data_first_1, input_data_first_2 = data_search_first(sheet)
 

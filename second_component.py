@@ -7,12 +7,8 @@ import os
 from constants import (
     RESULT_DIR, 
     WORK_DIR, 
-    DAILY_FINANCE_SHEET_NAME,
     DAILY_FINANCE_FILENAME,
-
-    STORAGE_COMPONENT_SHEET_NAME,
     STORAGE_COMPONENT_FILENAME,
-    
     ELECTRICITY_COMPANY
 )
 from dopfuncs import copy_file_to_result, autofill_formula_down, add_border
@@ -23,7 +19,7 @@ ELECTRICITY_FILENAME = 'Электричество*.xlsx'
 
         
         
-def electicity_data(app):
+def electicity_data(app, date_sheet):
     """Запись данных в Электричество"""
     logging.info("РАБОТА С ФАЙЛОМ ЭЛЕКТРИЧЕСТВО")
     daily_finance_path = glob(f'{WORK_DIR}/{DAILY_FINANCE_FILENAME}')
@@ -45,10 +41,10 @@ def electicity_data(app):
     try:
         # Ежедневный отчет получение данных
         try:
-            daily_sheet = daily_finance_book.sheets[DAILY_FINANCE_SHEET_NAME]
+            daily_sheet = daily_finance_book.sheets[date_sheet]
             log.info(f'Лист найден: {daily_sheet.name}')
         except:
-            log.error(f'Не найден лист: {DAILY_FINANCE_SHEET_NAME}')
+            log.error(f'Не найден лист: {date_sheet}')
 
         daily_finance_input_data = daily_finance_data_search(daily_sheet)
     
@@ -57,10 +53,10 @@ def electicity_data(app):
         
         # Склад и производство получение данных
         try:
-            storage_sheet = storage_book.sheets[STORAGE_COMPONENT_SHEET_NAME]
+            storage_sheet = storage_book.sheets[date_sheet]
             log.info(f'Лист найден: {storage_sheet.name}')
         except:
-            log.error(f'Не найден лист: {STORAGE_COMPONENT_SHEET_NAME}')
+            log.error(f'Не найден лист: {date_sheet}')
         try:
             storage_component_input_data = storage_data_search(storage_sheet)
         except Exception as e:

@@ -8,10 +8,7 @@ import os
 from constants import (
     RESULT_DIR, 
     WORK_DIR, 
-    DAILY_FINANCE_SHEET_NAME,
     DAILY_FINANCE_FILENAME,
-
-    STORAGE_COMPONENT_SHEET_NAME,
     STORAGE_COMPONENT_FILENAME,
 )
 from dopfuncs import copy_file_to_result
@@ -82,7 +79,6 @@ def services_to_us_input(
         for row in daily_data_2.rows:
             start_row = None
             company_name = row[0].value.strip().split('/')[0]
-            print(company_name)
 
             for sheet_name in book.sheets:
                 if company_name in sheet_name.name.strip():
@@ -222,7 +218,7 @@ def daily_finance_data_search_second(sheet: xw.Sheet):
     return clear_data_range
 
 
-def services_to_us_data(app):
+def services_to_us_data(app, date_sheet):
     """Запись данных в Поставщики комплектующих"""
     logging.info("РАБОТА С ФАЙЛОМ УСЛУГИ НАМ")
     daily_finance_path = glob(f'{WORK_DIR}/{DAILY_FINANCE_FILENAME}')
@@ -244,10 +240,10 @@ def services_to_us_data(app):
     try:
         # Ежедневный отчет получение данных
         try:
-            daily_sheet = daily_finance_book.sheets[DAILY_FINANCE_SHEET_NAME]
+            daily_sheet = daily_finance_book.sheets[date_sheet]
             log.info(f'Лист найден: {daily_sheet.name}')
         except:
-            log.error(f'Не найден лист: {DAILY_FINANCE_SHEET_NAME}')
+            log.error(f'Не найден лист: {date_sheet}')
 
         daily_finance_input_data_first = daily_finance_data_search_first(daily_sheet)
         daily_finance_input_data_second = daily_finance_data_search_second(
@@ -256,10 +252,10 @@ def services_to_us_data(app):
         
         # Склад и производство получение данных
         try:
-            storage_sheet = storage_book.sheets[STORAGE_COMPONENT_SHEET_NAME]
+            storage_sheet = storage_book.sheets[date_sheet]
             log.info(f'Лист найден: {storage_sheet.name}')
         except:
-            log.error(f'Не найден лист: {STORAGE_COMPONENT_SHEET_NAME}')
+            log.error(f'Не найден лист: {date_sheet}')
         #####
         # Запись полученных данных в поставщики комплектующих
         services_to_us_input(

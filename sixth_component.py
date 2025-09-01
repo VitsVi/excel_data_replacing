@@ -8,10 +8,6 @@ import os
 from constants import (
     RESULT_DIR, 
     WORK_DIR, 
-    DAILY_FINANCE_SHEET_NAME,
-    DAILY_FINANCE_FILENAME,
-
-    STORAGE_COMPONENT_SHEET_NAME,
     STORAGE_COMPONENT_FILENAME,
 )
 from dopfuncs import copy_file_to_result
@@ -115,7 +111,7 @@ def data_search_first(sheet: xw.Sheet):
     return clear_data_range
 
 
-def storage_complect_data(app):
+def storage_complect_data(app, date_sheet):
     """Запись данных в Поставщики комплектующих"""
     logging.info(f"РАБОТА С ФАЙЛОМ {FILENAME}")
 
@@ -131,10 +127,10 @@ def storage_complect_data(app):
     try:
         # Склад и производство получение данных
         try:
-            sheet = storage_book.sheets[STORAGE_COMPONENT_SHEET_NAME]
+            sheet = storage_book.sheets[date_sheet]
             log.info(f'Лист найден: {sheet.name}')
         except:
-            log.error(f'Не найден лист: {STORAGE_COMPONENT_SHEET_NAME}')
+            log.error(f'Не найден лист: {date_sheet}')
 
         input_data_first = data_search_first(sheet)
 

@@ -1,3 +1,5 @@
+# GitHub: https://github.com/VitsVi
+
 import xlwings as xw
 import datetime as dt
 from datetime import datetime
@@ -12,7 +14,7 @@ from fourth_component import daily_buyers_data
 from fifth_component import storage_material_data
 from sixth_component import storage_complect_data
 from seventh_component import we_services_and_report_card
-
+import constants
 
 init()
 
@@ -68,8 +70,8 @@ CHOOSEN_FILES = {
     '7': we_services_and_report_card
 }
 
+
 def funcs_manager():
-    
     console = True
     choosen_files = []
     choosen_files_id = []
@@ -102,7 +104,7 @@ def funcs_manager():
             inputter = input(Fore.GREEN + 'Ввод:').strip()
             if inputter == 'all':
                 console = False
-                return 'all'
+                return 'all', date
             elif inputter in TEXT_OUT.keys():
                 if TEXT_OUT[inputter] in choosen_files:
                     print(Fore.RED + 'Этот файл уже выбран')
@@ -110,7 +112,7 @@ def funcs_manager():
                 else:
                     if inputter == '0':
                         console = False
-                        return choosen_files_id
+                        return choosen_files_id, date
                     choosen_files.append(TEXT_OUT[inputter])
                     choosen_files_id.append(inputter)
                     print(Fore.GREEN + f'Выбран файл: {TEXT_OUT[inputter]}')
@@ -126,31 +128,32 @@ def funcs_manager():
 
 
 
-def funcs_runner(app: xw.App, result):
+def funcs_runner(app: xw.App, result, date_sheet):
     """Запуск функций в зависимости от выбора пользователя"""
     if result == 'all':
         logging.info("Запуск всех стадий")
         for func in CHOOSEN_FILES.values():
-            func(app)
+            func(app, date_sheet)
     else:
         logging.info("Запуск выбранных функций")
         for res in result:
-            CHOOSEN_FILES[res](app)
+            CHOOSEN_FILES[res](app, date_sheet)
 
 
 
 def main():
     try:
-        #result = funcs_manager()
+        result, date_sheet = funcs_manager()
         logging.info("Запуск приложения Excel")
         app = xw.App(visible=False)
-        # component_suppliers_data(app)
+        funcs_runner(app, result, date_sheet)
+        #component_suppliers_data(app, date_sheet)
         # electicity_data(app)
         # services_to_us_data(app)
         # daily_buyers_data(app)
         # storage_material_data(app)
         # storage_complect_data(app)
-        we_services_and_report_card(app)
+        # we_services_and_report_card(app)
     finally:
         logging.info("Закрытие приложения Excel")
         app.quit()
