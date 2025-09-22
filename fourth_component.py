@@ -181,7 +181,7 @@ def daily_finance_data_search_second(sheet: xw.Sheet):
 
 def daily_buyers_data(app, date_sheet):
     """Запись данных в Поставщики комплектующих"""
-    logging.info("РАБОТА С ФАЙЛОМ ЕЖЕДНЕВНЫЕ ПОКУПАТЕЛИ")
+    log.info("РАБОТА С ФАЙЛОМ ЕЖЕДНЕВНЫЕ ПОКУПАТЕЛИ")
     daily_finance_path = glob(f'{WORK_DIR}/{DAILY_FINANCE_FILENAME}')
     storage_component_path = glob(f'{WORK_DIR}/{STORAGE_COMPONENT_FILENAME}')
 

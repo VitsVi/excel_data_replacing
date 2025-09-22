@@ -14,6 +14,7 @@ from fourth_component import daily_buyers_data
 from fifth_component import storage_material_data
 from sixth_component import storage_complect_data
 from seventh_component import we_services_and_report_card
+from eighth_component import saldo_data
 import constants
 
 init()
@@ -58,6 +59,7 @@ TEXT_OUT = {
     '5': 'РАБОТА С ФАЙЛОМ СКЛАД СЫРЬЕ',
     '6': 'РАБОТА С ФАЙЛОМ СКЛАД КОМПЛЕКТ',
     '7': 'РАБОТА С ФАЙЛОМ УСЛУГИ МЫ И ТАБЕЛЬ',
+    '8': 'РАБОТА С ФАЙЛОМ САЛЬДО',
     '0': 'ЗАПУСК ВЫБРАННЫХ ПРОГРАММ',
 }
 CHOOSEN_FILES = {
@@ -67,7 +69,8 @@ CHOOSEN_FILES = {
     '4': daily_buyers_data,
     '5': storage_material_data,
     '6': storage_complect_data,
-    '7': we_services_and_report_card
+    '7': we_services_and_report_card,
+    '8': saldo_data,
 }
 
 
@@ -147,13 +150,9 @@ def main():
         logging.info("Запуск приложения Excel")
         app = xw.App(visible=False)
         funcs_runner(app, result, date_sheet)
-        #component_suppliers_data(app, date_sheet)
-        # electicity_data(app)
-        # services_to_us_data(app)
-        # daily_buyers_data(app)
-        # storage_material_data(app)
-        # storage_complect_data(app)
-        # we_services_and_report_card(app)
+        #saldo_data(app, date_sheet)
+
+
     finally:
         logging.info("Закрытие приложения Excel")
         app.quit()

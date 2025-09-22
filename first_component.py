@@ -1,6 +1,7 @@
 from dopfuncs import autofill_formula_down, add_border
 import sys
 import shutil
+import traceback
 import xlwings as xw
 from glob import glob
 import logging
@@ -79,7 +80,7 @@ def component_suppliers_input(
         log.info('Запись данных из Склад и производство в Поставщики комплектующих')
         used_storage_sheet = []
         for row in storage_data.rows:
-            if row[1].value.strip() in used_storage_sheet:
+            if not row[1].value or row[1].value.strip() in used_storage_sheet:
                 continue
             list_found = False
             lower_ground = None
@@ -103,7 +104,7 @@ def component_suppliers_input(
 
                         
                     for row_in in storage_data.rows:
-                        if sheet_name.name.strip() == row_in[1].value.strip() and row_in[4].value:
+                        if row_in[1].value and sheet_name.name.strip() == row_in[1].value.strip() and row_in[4].value:
                             try:
                                 cell_input_date = sheet_name.range(f'A{lower_ground}')
                                 cell_input_product = sheet_name.range(f'B{lower_ground}')
@@ -153,8 +154,10 @@ def component_suppliers_input(
             used_storage_sheet.append(row[1].value.strip())
         
 
-    except:
+    except Exception as e:
         log.error(f'Ошибка при работе с файлом: {COMPONENT_SUPPLIERS_FILENAME}')
+        #print(e)
+        traceback.print_exc()
         sys.exit(1)
     finally:
         log.info(f'Закрытие книги: {COMPONENT_SUPPLIERS_FILENAME}')
@@ -259,7 +262,7 @@ def storage_data_search(sheet):
 
 def component_suppliers_data(app, date_sheet):
     """Запись данных в Поставщики комплектующих"""
-    logging.info("РАБОТА С ФАЙЛОМ ПОСТАВЩИКИ КОМЛПЕКТУЮЩИХ")
+    log.info("РАБОТА С ФАЙЛОМ ПОСТАВЩИКИ КОМЛПЕКТУЮЩИХ")
     daily_finance_path = glob(f'{WORK_DIR}/{DAILY_FINANCE_FILENAME}')
     storage_component_path = glob(f'{WORK_DIR}/{STORAGE_COMPONENT_FILENAME}')
     if not daily_finance_path:

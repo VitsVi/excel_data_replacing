@@ -113,7 +113,7 @@ def data_search_first(sheet: xw.Sheet):
 
 def storage_complect_data(app, date_sheet):
     """Запись данных в Поставщики комплектующих"""
-    logging.info(f"РАБОТА С ФАЙЛОМ {FILENAME}")
+    log.info(f"РАБОТА С ФАЙЛОМ {FILENAME}")
 
     storage_component_path = glob(f'{WORK_DIR}/{STORAGE_COMPONENT_FILENAME}')
 

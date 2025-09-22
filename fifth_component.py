@@ -5,6 +5,7 @@ import xlwings as xw
 from glob import glob
 import logging
 import os
+import traceback
 from constants import (
     RESULT_DIR, 
     WORK_DIR, 
@@ -68,6 +69,7 @@ def file_input(
 
     except:
         log.error(f'Ошибка при работе с файлом: {FILENAME}')
+        traceback.print_exc()
         sys.exit(1)
     finally:
         log.info(f'Закрытие книги: {FILENAME}')
@@ -114,7 +116,7 @@ def data_search_first(sheet: xw.Sheet):
 
 def storage_material_data(app, date_sheet):
     """Запись данных в Поставщики комплектующих"""
-    logging.info(f"РАБОТА С ФАЙЛОМ {FILENAME}")
+    log.info(f"РАБОТА С ФАЙЛОМ {FILENAME}")
 
     storage_component_path = glob(f'{WORK_DIR}/{STORAGE_COMPONENT_FILENAME}')
 
@@ -145,7 +147,7 @@ def storage_material_data(app, date_sheet):
             input_data_first,
         )
     except Exception as e:
-        print(e)
+        traceback.print_exc()
         log.error(
             'Ошибка при работе с файлами: '
             f'{STORAGE_COMPONENT_FILENAME}, {FILENAME}'

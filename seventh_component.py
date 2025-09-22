@@ -193,7 +193,7 @@ def looking_data(start_target_name, finish_target_name, sheet, alternative=True)
 
 def we_services_and_report_card(app, date_sheet):
     """Запись данных в Поставщики комплектующих"""
-    logging.info(f"РАБОТА С ФАЙЛОМ {FILENAME}")
+    log.info(f"РАБОТА С ФАЙЛОМ {FILENAME}")
 
     storage_component_path = glob(f'{WORK_DIR}/{DAILY_FINANCE_FILENAME}')
 
