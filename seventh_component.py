@@ -145,7 +145,7 @@ def data_search_first(sheet: xw.Sheet):
 
     start_target_name = 'Касса'
     finish_target_name = 'Остаток на конец дня'
-    start_target_name_2 = 'Расчётный счёт'
+    start_target_name_2 = 'Расчетный счет'
     finish_target_name_2 = 'ИТОГО'
 
     clear_data_range_1 = looking_data(start_target_name, finish_target_name, sheet)

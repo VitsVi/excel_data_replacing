@@ -10,6 +10,7 @@ from constants import (
     RESULT_DIR, 
     WORK_DIR, 
     STORAGE_COMPONENT_FILENAME,
+    DAILY_FINANCE_FILENAME
 )
 from dopfuncs import copy_file_to_result
 
@@ -25,6 +26,7 @@ FILENAME = 'Сальдо.xlsx'
 def file_input(
     app: xw.App,
     data_1,
+    data_2,
 ):
     copy_file_to_result(FILENAME)
 
@@ -48,6 +50,8 @@ def file_input(
             raise
         looking_range = sheet_1.range('A1:A300')
         looking_names = {
+            'Р/с Снекпром': data_2[0],
+            'касса Снекпром': data_2[1],
             'Склад (комплектующие)': data_1[3],
             'Склад (сырье)': data_1[2],
             'Склад (полуфабрикаты)': data_1[1],
@@ -57,11 +61,11 @@ def file_input(
             score = 0
             for cell in looking_range:
                 for key in looking_names.keys():
-                    if cell.value and key in cell.value:
+                    if cell.value and key.lower() in cell.value.lower():
                         sheet_1.range(f'B{cell.row}').value = looking_names[key].value
                         log.info(f'Найдена ячейка для записи, {cell.value} изменена на {looking_names[key].value}')
                         score += 1
-                if score == 4:
+                if score == 6:
                     log.info('Все ячейки успешно заполнены')
                     break
         except:
@@ -89,9 +93,9 @@ def data_catching(sheet: xw.Sheet, start_target_name:str, finish_target_name:str
         found_cell_start = None
         found_cell_finish = None
         for cell in search_range:
-            if cell.value is not None and start_target_name in cell.value:
+            if cell.value is not None and start_target_name.lower() in cell.value.lower():
                 found_cell_start = cell
-            if cell.value == finish_target_name and found_cell_start is not None:
+            if cell.value is not None and cell.value.lower() == finish_target_name.lower() and found_cell_start is not None:
                 found_cell_finish = cell
             if found_cell_start and found_cell_finish:
                 break
@@ -126,28 +130,36 @@ def data_search_first(sheet: xw.Sheet):
     """Поиск данных в файле Ежедневный отчет склад и производство"""
     results = []
     results.append(data_catching(sheet, start_target_name='Склад готовой продукции', finish_target_name='ИТОГО', column='N'))
-    results.append(data_catching(sheet, start_target_name='СКЛАД Производства', finish_target_name='ИТОГО:', column='G'))
-    results.append(data_catching(sheet, start_target_name='СКЛАД СЫРЬЕВЫХ КОМПОНЕНТОВ', finish_target_name='Остаток по складу в деньгах', column='I'))
-    results.append(data_catching(sheet, start_target_name='Склад Материалов', finish_target_name='ИТОГО', column='I'))
+    results.append(data_catching(sheet, start_target_name='СКЛАД Производства', finish_target_name='ИТОГО', column='G'))
+    results.append(data_catching(sheet, start_target_name='СКЛАД СЫРЬЕВЫХ КОМПОНЕНТОВ', finish_target_name='Остаток по складу в деньгах', column='H'))
+    results.append(data_catching(sheet, start_target_name='Склад Материалов', finish_target_name='ИТОГО', column='H'))
+    log.info(f'Данные из листа {sheet.name} получены')
+    return results
+
+def data_search_second(sheet: xw.Sheet):
+    """Поиск данных в файле Ежедневный отчет склад и производство"""
+    results = []
+    results.append(data_catching(sheet, start_target_name='Расчетный счет', finish_target_name='ИТОГО', column='C'))
+    results.append(data_catching(sheet, start_target_name='Касса', finish_target_name='Остаток на конец дня', column='D'))
     log.info(f'Данные из листа {sheet.name} получены')
     return results
 
 
 def saldo_data(app, date_sheet):
-    """Запись данных в Поставщики комплектующих"""
+    """Запись данных в Сальдо"""
     log.info(f"РАБОТА С ФАЙЛОМ {FILENAME}")
 
-    storage_component_path = glob(f'{WORK_DIR}/{STORAGE_COMPONENT_FILENAME}')
-
-    if not storage_component_path:
-        log.error(f'Не найден файл: {STORAGE_COMPONENT_FILENAME}')
-        sys.exit(1)
-
-    storage_book = app.books.open(storage_component_path[0])
-    log.info(f'Открытие книги: {STORAGE_COMPONENT_FILENAME}')
 
     try:
         # Склад и производство получение данных
+        storage_component_path = glob(f'{WORK_DIR}/{STORAGE_COMPONENT_FILENAME}')
+
+        if not storage_component_path:
+            log.error(f'Не найден файл: {STORAGE_COMPONENT_FILENAME}')
+            sys.exit(1)
+
+        storage_book = app.books.open(storage_component_path[0])
+        log.info(f'Открытие книги: {STORAGE_COMPONENT_FILENAME}')
         try:
             sheet = storage_book.sheets[date_sheet]
             log.info(f'Лист найден: {sheet.name}')
@@ -161,10 +173,36 @@ def saldo_data(app, date_sheet):
             log.info(f'Данных для записи в {FILENAME} не найдено')
             return
         
+        # Ежедневный отчет данные
+
+        storage_component_path = glob(f'{WORK_DIR}/{DAILY_FINANCE_FILENAME}')
+
+        if not storage_component_path:
+            log.error(f'Не найден файл: {DAILY_FINANCE_FILENAME}')
+            sys.exit(1)
+
+        storage_book = app.books.open(storage_component_path[0])
+        log.info(f'Открытие книги: {DAILY_FINANCE_FILENAME}')
+
+        try:
+            sheet = storage_book.sheets[date_sheet]
+            log.info(f'Лист найден: {sheet.name}')
+        except:
+            log.error(f'Не найден лист: {date_sheet}')
+
+        input_data_second = data_search_second(sheet)
+
+        
+        if not input_data_second:
+            log.info(f'Данных для записи в {FILENAME} не найдено')
+            return
+
+        
         # Запись полученных данных в поставщики комплектующих
         file_input(
             app, 
             input_data_first,
+            input_data_second,
         )
     except Exception as e:
         print(e)

@@ -171,8 +171,8 @@ def daily_finance_data_search_first(sheet: xw.Sheet):
 def daily_finance_data_search_second(sheet: xw.Sheet):
     """Поиск данных в расчетном счете по агентам."""
 
-    start_target_name = 'Расчётный счёт'
-    finish_target_name = 'ИТОГО:'
+    start_target_name = 'Расчетный счет'
+    finish_target_name = 'ИТОГО'
 
     search_range = sheet.range('A1:E100')
 

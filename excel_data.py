@@ -151,7 +151,7 @@ def main():
         app = xw.App(visible=False)
         funcs_runner(app, result, date_sheet)
         #saldo_data(app, date_sheet)
-
+        #component_suppliers_data(app, date_sheet)
 
     finally:
         logging.info("Закрытие приложения Excel")

@@ -86,8 +86,8 @@ def electicity_data(app, date_sheet):
 def daily_finance_data_search(sheet: xw.Sheet):
     """Поиск данных в файле Ежедневный отчет"""
 
-    start_target_name = 'Расчётный счёт'
-    finish_target_name = 'ИТОГО:'
+    start_target_name = 'Расчетный счет'
+    finish_target_name = 'ИТОГО'
 
     search_range = sheet.range('A1:E100')
 

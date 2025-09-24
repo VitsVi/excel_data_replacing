@@ -47,7 +47,8 @@ def component_suppliers_input(
             list_found = False
             lower_ground = None
             for sheet_name in book.sheets:
-                if sheet_name.name.strip() == row[0].value.strip():
+                #if sheet_name.name.strip() == row[0].value.strip():
+                if sheet_name.name.strip() in row[0].value.strip():
                     list_found = True
                     log.info(f'Лист найден: {row[0].value}')
                     sheet = book.sheets[sheet_name.name]
@@ -60,19 +61,20 @@ def component_suppliers_input(
                         if cell.value is not None:
                             lower_ground = sheet_name.range(f'A{cell.row + 1}')
                             break
-                    if formula_cell.row - lower_ground.row > daily_data.rows.count:
-                        try:
-                           # lower_ground.value = daily_data.value
-                            book.save()
-                        except Exception as e:
-                            print(e)
+                    # if formula_cell.row - lower_ground.row < daily_data.rows.count:
+                    #     try:
+                    #        # lower_ground.value = daily_data.value
+                    #         book.save()
+                    #     except Exception as e:
+                    #         print(e)
                         
-                    else:
-                        cell_input_data = sheet_name.range(f'G{lower_ground.row}')
-                        cell_input_date = sheet_name.range(f'F{lower_ground.row}')
-                        cell_input_data.value = row[1].value
-                        cell_input_date.value = daily_data.sheet.name
-                        book.save()
+                    #else:
+                    print(f'DATA: {row[1].value} {daily_data.sheet.name}')
+                    cell_input_data = sheet_name.range(f'G{lower_ground.row}')
+                    cell_input_date = sheet_name.range(f'F{lower_ground.row}')
+                    cell_input_data.value = row[1].value
+                    cell_input_date.value = daily_data.sheet.name
+                    book.save()
             if not list_found:
                 log.info(f'НЕ найден лист: {row[0].value}')
                 
@@ -85,7 +87,7 @@ def component_suppliers_input(
             list_found = False
             lower_ground = None
             for sheet_name in book.sheets:
-                if sheet_name.name.strip() == row[1].value.strip():
+                if sheet_name.name.strip() in row[1].value.strip():
                     list_found = True
                     log.info(f'Лист найден: {row[1].value}')
                     sheet = book.sheets[sheet_name.name]
@@ -104,7 +106,8 @@ def component_suppliers_input(
 
                         
                     for row_in in storage_data.rows:
-                        if row_in[1].value and sheet_name.name.strip() == row_in[1].value.strip() and row_in[4].value:
+                        if row_in[1].value and sheet_name.name.strip() in row_in[1].value.strip() and row_in[4].value:
+                            print('данные прошли валидацию, запись...')
                             try:
                                 cell_input_date = sheet_name.range(f'A{lower_ground}')
                                 cell_input_product = sheet_name.range(f'B{lower_ground}')
@@ -144,7 +147,7 @@ def component_suppliers_input(
                                     # formula_cell_I = ...
                             except Exception as e:
                                 print(e)
-                    book.save()
+                            book.save()
                     if lower_ground:
                         add_border(sheet_name.range(f'A1:I{lower_ground+4}'))
 
@@ -172,8 +175,8 @@ def component_suppliers_input(
 def daily_finance_data_search(sheet: xw.Sheet):
     """Поиск данных в файле Ежедневный отчет"""
 
-    start_target_name = 'Расчётный счёт'
-    finish_target_name = 'ИТОГО:'
+    start_target_name = 'Расчетный счет'
+    finish_target_name = 'ИТОГО'
 
     search_range = sheet.range('A1:E100')
 
