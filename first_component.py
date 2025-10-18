@@ -52,14 +52,14 @@ def component_suppliers_input(
                     list_found = True
                     log.info(f'Лист найден: {row[0].value}')
                     sheet = book.sheets[sheet_name.name]
-                    looking_range = sheet.range('A1:A200')
+                    looking_range = sheet.range('F1:F200')
                     formula_cell = None
                     for cell in reversed(looking_range):
                         
                         if sheet_name.range(f'E{cell.row}').formula and not formula_cell:
                             formula_cell = sheet_name.range(f'E{cell.row}')
                         if cell.value is not None:
-                            lower_ground = sheet_name.range(f'A{cell.row + 1}')
+                            lower_ground = sheet_name.range(f'F{cell.row + 1}')
                             break
                     # if formula_cell.row - lower_ground.row < daily_data.rows.count:
                     #     try:
@@ -82,14 +82,14 @@ def component_suppliers_input(
         log.info('Запись данных из Склад и производство в Поставщики комплектующих')
         used_storage_sheet = []
         for row in storage_data.rows:
-            if not row[1].value or row[1].value.strip() in used_storage_sheet:
-                continue
+            # if not row[1].value or row[1].value.strip() in used_storage_sheet:
+            #     continue
             list_found = False
             lower_ground = None
             for sheet_name in book.sheets:
                 if sheet_name.name.strip() in row[1].value.strip():
                     list_found = True
-                    log.info(f'Лист найден: {row[1].value}')
+                    log.info(f'Лист найден: {row[1].value}. Данные: {row[0].value} | Расход за день: {row[4].value}')
                     sheet = book.sheets[sheet_name.name]
                     looking_range = sheet.range('A1:A200')
                     formula_cell_E = None
@@ -105,51 +105,51 @@ def component_suppliers_input(
                             break
 
                         
-                    for row_in in storage_data.rows:
-                        if row_in[1].value and sheet_name.name.strip() in row_in[1].value.strip() and row_in[4].value:
-                            print('данные прошли валидацию, запись...')
-                            try:
-                                cell_input_date = sheet_name.range(f'A{lower_ground}')
-                                cell_input_product = sheet_name.range(f'B{lower_ground}')
-                                cell_input_cost = sheet_name.range(f'D{lower_ground}')
-                                cell_input_count = sheet_name.range(f'C{lower_ground}')
-                                cell_input_date.value = storage_data.sheet.name
-                                cell_input_product.value = row_in[0].value
-                                cell_input_cost.value = row_in[6].value
-                                cell_input_count.value = row_in[4].value
-                                
-                                cell_input_formule_E = sheet.range(f'E{lower_ground}')
-                                cell_input_formule_E.value = f'=C{lower_ground}*D{lower_ground}'
+                    #for row in storage_data.rows:
+                    if row[1].value and sheet_name.name.strip() in row[1].value.strip() and row[4].value:
+                        print('данные прошли валидацию, запись...')
+                        try:
+                            cell_input_date = sheet_name.range(f'A{lower_ground}')
+                            cell_input_product = sheet_name.range(f'B{lower_ground}')
+                            cell_input_cost = sheet_name.range(f'D{lower_ground}')
+                            cell_input_count = sheet_name.range(f'C{lower_ground}')
+                            cell_input_date.value = storage_data.sheet.name
+                            cell_input_product.value = row[0].value
+                            cell_input_cost.value = row[6].value
+                            cell_input_count.value = row[4].value
+                            
+                            cell_input_formule_E = sheet.range(f'E{lower_ground}')
+                            cell_input_formule_E.value = f'=C{lower_ground}*D{lower_ground}'
 
-                                lower_ground += 1
-                                if lower_ground == formula_cell_E.row:
-                                    print('LOWER:', lower_ground)
-                                    #delete formula
-                                    cell_G = sheet_name.range(f'G{lower_ground}')
-                                    cell_E = sheet_name.range(f'E{lower_ground}')
-                                    cell_I = sheet_name.range(f'I{lower_ground}')
-                                    cell_G.formula = None
-                                    cell_E.formula = None
-                                    cell_I.formula = None
-                                    #replace formula
-                                    formula_cell_G = sheet_name.range(f'G{lower_ground+5}')
-                                    formula_cell_E = sheet_name.range(f'E{lower_ground+5}')
-                                    formula_cell_I = sheet_name.range(f'I{lower_ground+5}')
-                                    print(formula_cell_I)
-                                    formula_cell_E.formula = f'=SUM(E2:E{lower_ground+4})'
-                                    formula_cell_G.formula = f'=SUM(G2:G{lower_ground+4})'
-                                    formula_cell_I.formula = f'=G{lower_ground+5}-E{lower_ground+5}'
-                                    print(formula_cell_I.formula)
-                                    main_formula_cell_I = sheet_name.range(f'I{lower_ground-1}')
-                                    
-                                    autofill_formula_down(sheet_name, main_formula_cell_I, 6)
-                                    # formula_cell_I.value = ...
-                                    # formula_cell_I = ...
-                            except Exception as e:
-                                print(e)
-                            book.save()
-                    if lower_ground:
-                        add_border(sheet_name.range(f'A1:I{lower_ground+4}'))
+                            lower_ground += 1
+                            if lower_ground == formula_cell_E.row:
+                                print('LOWER:', lower_ground)
+                                #delete formula
+                                cell_G = sheet_name.range(f'G{lower_ground}')
+                                cell_E = sheet_name.range(f'E{lower_ground}')
+                                cell_I = sheet_name.range(f'I{lower_ground}')
+                                cell_G.formula = None
+                                cell_E.formula = None
+                                cell_I.formula = None
+                                #replace formula
+                                formula_cell_G = sheet_name.range(f'G{lower_ground+5}')
+                                formula_cell_E = sheet_name.range(f'E{lower_ground+5}')
+                                formula_cell_I = sheet_name.range(f'I{lower_ground+5}')
+                                print(formula_cell_I)
+                                formula_cell_E.formula = f'=SUM(E2:E{lower_ground+4})'
+                                formula_cell_G.formula = f'=SUM(G2:G{lower_ground+4})'
+                                formula_cell_I.formula = f'=G{lower_ground+5}-E{lower_ground+5}'
+                                print(formula_cell_I.formula)
+                                main_formula_cell_I = sheet_name.range(f'I{lower_ground-1}')
+                                
+                                autofill_formula_down(sheet_name, main_formula_cell_I, 6)
+                                # formula_cell_I.value = ...
+                                # formula_cell_I = ...
+                        except Exception as e:
+                            print(e)
+                        book.save()
+                if lower_ground:
+                    add_border(sheet_name.range(f'A1:I{lower_ground+4}'))
 
             if not list_found:
                 log.info(f'НЕ найден лист: {row[1].value}')
